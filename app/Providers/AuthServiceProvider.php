@@ -5,7 +5,7 @@ namespace App\Providers;
 use App\Permission;
 use App\Post;
 use App\User;
-use Illuminate\Contracts\Auth\Access\Gate as GateContract;
+//use Illuminate\Contracts\Auth\Access\Gate;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\Gate;
 
@@ -24,18 +24,23 @@ class AuthServiceProvider extends ServiceProvider
     /**
      * Register any authentication / authorization services.
      *
-     * @param GateContract $gate
      * @return void
      */
-    public function boot(GateContract $gate)
+    public function boot()
     {
         $this->registerPolicies();
 
         $permissions = Permission::with('roles')->get();
-        foreach ($permissions as $permission)
-        {
-            //dd($gate);
-            $gate->define($permission->name, function (User $user) use ($permission){
+        /*
+        * Load an object to roles
+        * carrega um objeto com todas as funções pertencentes as roles
+        * edit => Manager, Adm
+        * view => All
+        * delete => Adm
+        * create => All
+        */
+        foreach ($permissions as $permission) {
+            Gate::define($permission->name, function (User $user) use ($permission) {
                 return $user->hasPermission($permission);
             });
         }
